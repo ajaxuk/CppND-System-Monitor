@@ -82,7 +82,7 @@ long LinuxParser::UpTime() {
     std::istringstream linestream(line);
     linestream >> uptime;
   }
-  return std::stol(uptime);
+  return std::stol(uptime); //convert string to long
 }
 
 // TODO: Read and return the number of jiffies for the system
