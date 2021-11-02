@@ -1,5 +1,6 @@
 #include "linux_parser.h"
 
+
 #include <dirent.h>
 #include <unistd.h>
 
@@ -125,10 +126,27 @@ long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
 long LinuxParser::ActiveJiffies() { return 0; }
 
 // TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { return 0; }
+long LinuxParser::IdleJiffies() { 
+  
+  return 0; }
 
 // TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() { return {}; }
+vector<string> LinuxParser::CpuUtilization() {
+  vector<string> cpu_util{};
+  string item;
+  string line;
+  std::ifstream stream(kProcDirectory + kVersionFilename);
+  if (stream.is_open()) {
+    std::getline(stream, line);
+    std::istringstream linestream(line);
+    for (int i = 0; i < 10; i++) {
+      linestream >> item;
+      cpu_util.push_back(item);
+    }
+  }
+
+  return cpu_util;
+}
 
 // DONE: Read and return the total number of processes
 int LinuxParser::TotalProcesses() {
