@@ -1,40 +1,42 @@
 #include "processor.h"
 
+#include <iostream>
 #include <string>
 #include <vector>
 
 #include "linux_parser.h"
 
 // TODO: Return the aggregate CPU utilization
-float Processor::Utilization() { return 0.0; }
 
-/*
-long total_delta;
-long idle_delta;
+using namespace LinuxParser;
 
-std::vector<std::string> stats = LinuxParser::CpuUtilization();
-long prev_activejiffies = cpu_stats_[0] + cpu_stats_[1] + cpu_stats_[2] +
-                          cpu_stats_[5] + cpu_stats_[6] + cpu_stats_[7] +
-                          cpu_stats_[8] + cpu_stats_[9];
-long prev_idlejiffies = cpu_stats_[3] + cpu_stats_[4];
-SetStats(stats);
-long activejiffies = cpu_stats_[0] + cpu_stats_[1] + cpu_stats_[2] +
-                     cpu_stats_[5] + cpu_stats_[6] + cpu_stats_[7] +
-                     cpu_stats_[8] + cpu_stats_[9];
-long idlejiffies = cpu_stats_[3] + cpu_stats_[4];
-
-total_delta =
-    (activejiffies + idlejiffies) - (prev_activejiffies + prev_idlejiffies);
-idle_delta = idlejiffies - prev_idlejiffies;
-
-return (float)(total_delta - idle_delta) / total_delta;
+// Convert string to long and store in Private variable
+void Processor::Utilization(std::vector<std::string> &utilization) {
+  for (int i = kUser_; i <= kGuestNice_; i++) {
+    utilization_[i] = std::stol(utilization[i]);
+  }
 }
 
-void Processor::SetStats(std::vector<std::string> &stats) {
-for (int i = 0; i < 10; i++)
+float Processor::Utilization() {
+  long total_delta;
+  long idle_delta;
+  long prev_activejiffies = utilization_[kUser_] + utilization_[kNice_] +
+                            utilization_[kSystem_] + utilization_[kIRQ_] +
+                            utilization_[kSoftIRQ_] + utilization_[kSteal_];
 
-{
-  cpu_stats_[i] = std::stol(stats[i]);
+  long prev_idlejiffies = utilization_[kIdle_] + utilization_[kIOwait_];
+
+  std::vector<std::string> stats = LinuxParser::CpuUtilization();
+  Utilization(stats);
+  long activejiffies = utilization_[kUser_] + utilization_[kNice_] +
+                       utilization_[kSystem_] + utilization_[kIRQ_] +
+                       utilization_[kSoftIRQ_] + utilization_[kSteal_];
+
+  long idlejiffies = utilization_[kIdle_] + utilization_[kIOwait_];
+
+  total_delta =
+      (activejiffies + idlejiffies) - (prev_activejiffies + prev_idlejiffies);
+  idle_delta = idlejiffies - prev_idlejiffies;
+
+  return (float)(total_delta - idle_delta) / total_delta;
 }
-}
-*/

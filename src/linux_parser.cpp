@@ -128,28 +128,25 @@ long LinuxParser::ActiveJiffies() { return 0; }
 long LinuxParser::IdleJiffies() { return 0; }
 
 // TODO: Read and return CPU utilization
-
-vector<string> LinuxParser::CpuUtilization() { return {}; }
-/*
-
 vector<string> LinuxParser::CpuUtilization() {
   vector<string> cpu_util{};
   string item;
   string line;
-  std::ifstream stream(kProcDirectory + kVersionFilename);
+  std::ifstream stream(kProcDirectory + kStatFilename);
   if (stream.is_open()) {
     std::getline(stream, line);
     std::istringstream linestream(line);
-    for (int i = 0; i < 10; i++) {
+    linestream >> item;  // dispose of first item which is CPU label. Maybe later add
+                         // checking to make sure first line is CPU...
+    for (int i = kUser_; i <= kGuestNice_; i++) {
       linestream >> item;
-      std::cout << item << " ";
       cpu_util.push_back(item);
     }
   }
 
   return cpu_util;
 }
-*/
+
 // DONE: Read and return the total number of processes
 int LinuxParser::TotalProcesses() {
   string key;

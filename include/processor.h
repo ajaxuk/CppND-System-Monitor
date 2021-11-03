@@ -1,15 +1,15 @@
 #ifndef PROCESSOR_H
 #define PROCESSOR_H
 
-#include<vector>
-#include<string>
-
+#include <string>
+#include <vector>
 
 class Processor {
  public:
   float Utilization();
 
-void SetStats(std::vector<std::string> &stats);
+  void Utilization(std::vector<std::string> &utilization);
+
   // TODO: See src/processor.cpp
   // TODO: Declare any necessary private members
 
@@ -19,7 +19,8 @@ void SetStats(std::vector<std::string> &stats);
   // read to give a more accurate picture of overall CPU tilisiation. user ||
   // nice || system || idle || iowait || irq|| softirq || steal || guest ||
   // guest_nice
-  std::vector<long> cpu_stats_{10, 0};
+  // std::vector<long> utilization_(10,0);    <= Why doesnt this work?
+  std::vector<long> utilization_{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 };
 
 #endif
