@@ -20,8 +20,9 @@ class System {
 
   // TODO: Define any necessary private members
  private:
-  Processor cpu_ = {};
-  std::vector<Process> processes_ = {};
+  Processor cpu_ = {};  // compoisiton:System "has a" cpu
+  std::vector<Process> processes_ =
+      {};  // cpmposiiton: Should cpu_have processe rather than System...?
 };
 
 #endif

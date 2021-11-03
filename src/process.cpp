@@ -12,19 +12,24 @@ using std::to_string;
 using std::vector;
 
 // TODO: Return this process's ID
-int Process::Pid() { return 0; }
+int Process::Pid() const { return pid_; }
+string Process::User() const { return user_; }
+float Process::CpuUtilization() const { return cpuutilization_; }
+string Process::Ram() const { return ram_; }
 
-// TODO: Return this process's CPU utilization
-float Process::CpuUtilization() { return 0; }
+void Process::Pid(int pid) { pid_ = pid; }
+void Process::User(std::string user) { user_ = user; }
+void Process::CpuUtilization(float cpuutilization) {
+  cpuutilization_ = cpuutilization;
+}
+void Process::Ram(std::string ram) { ram_ = ram; }
+
+// void Process::Command(std::string command){};
+
+// void Process::UpTime(long int uptime){};
 
 // TODO: Return the command that generated this process
 string Process::Command() { return string(); }
-
-// TODO: Return this process's memory utilization
-string Process::Ram() { return string(); }
-
-// TODO: Return the user (name) that generated this process
-string Process::User() { return string(); }
 
 // TODO: Return the age of this process (in seconds)
 long int Process::UpTime() { return 0; }

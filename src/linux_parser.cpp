@@ -136,8 +136,8 @@ vector<string> LinuxParser::CpuUtilization() {
   if (stream.is_open()) {
     std::getline(stream, line);
     std::istringstream linestream(line);
-    linestream >> item;  // dispose of first item which is CPU label. Maybe later add
-                         // checking to make sure first line is CPU...
+    linestream >> item;  // dispose of first item which is CPU label. Maybe
+                         // later add checking to make sure first line is CPU...
     for (int i = kUser_; i <= kGuestNice_; i++) {
       linestream >> item;
       cpu_util.push_back(item);
@@ -229,6 +229,10 @@ string LinuxParser::Uid(int pid) {
 // REMOVE: [[maybe_unused]] once you define the function
 string LinuxParser::User(int pid) {
   std::string uid = Uid(pid);
+
+  std::cout << " HELLO "
+            << "\n";
+  std::cout << uid << "\n";
 
   string user;
   string line;

@@ -18,21 +18,25 @@ void Processor::Utilization(std::vector<std::string> &utilization) {
 }
 
 float Processor::Utilization() {
-  long total_delta;
-  long idle_delta;
-  long prev_activejiffies = utilization_[kUser_] + utilization_[kNice_] +
-                            utilization_[kSystem_] + utilization_[kIRQ_] +
-                            utilization_[kSoftIRQ_] + utilization_[kSteal_];
+  long total_delta{0};
+  long idle_delta{0};
+  long prev_activejiffies{0};
+  long prev_idlejiffies{0};
+  long activejiffies{0};
+  long idlejiffies{0};
 
-  long prev_idlejiffies = utilization_[kIdle_] + utilization_[kIOwait_];
+  std::vector<int> active_procs{kUser_, kNice_,    kSystem_, kSystem_,
+                                kIRQ_,  kSoftIRQ_, kSteal_};
+  std::vector<int> idle_procs{kIdle_, kIOwait_};
 
-  std::vector<std::string> stats = LinuxParser::CpuUtilization();
-  Utilization(stats);
-  long activejiffies = utilization_[kUser_] + utilization_[kNice_] +
-                       utilization_[kSystem_] + utilization_[kIRQ_] +
-                       utilization_[kSoftIRQ_] + utilization_[kSteal_];
+  for (auto ap : active_procs) prev_activejiffies += utilization_[ap];
+  for (auto ip : idle_procs) prev_idlejiffies += utilization_[ip];
 
-  long idlejiffies = utilization_[kIdle_] + utilization_[kIOwait_];
+  std::vector<std::string> all_procs = LinuxParser::CpuUtilization();
+  Utilization(all_procs);
+
+  for (auto ap : active_procs) activejiffies += utilization_[ap];
+  for (auto ip : idle_procs) idlejiffies += utilization_[ip];
 
   total_delta =
       (activejiffies + idlejiffies) - (prev_activejiffies + prev_idlejiffies);
