@@ -225,7 +225,8 @@ string LinuxParser::Ram(int pid) {
 
         if (key == "VmSize:") {
           stream.close();
-          return value;
+
+          return std::to_string((int)(std::stof(value) / 1024));
         }
       }
     }
@@ -342,7 +343,8 @@ float LinuxParser::ProcCpu(int pid) {
         total_time += cutime + cstime;  // incldue children processes
         long seconds = up_time - start_time;
 
-        return ((float)total_time / seconds);
+        return ((float)total_time /
+                seconds);  // already multiplied by 100 in ncurses_display.cpp
       }
     }
   }
