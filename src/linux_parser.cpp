@@ -194,11 +194,45 @@ int LinuxParser::RunningProcesses() {
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Command(int pid [[maybe_unused]]) { return string(); }
+string LinuxParser::Command(int pid) {
+  string key;
+  string line;
+  string value;
+  std::ifstream stream(kProcDirectory + std::to_string(pid) + kCmdlineFilename);
+  if (stream.is_open()) {
+    while (std::getline(stream, line)) {
+      std::istringstream linestream(line);
+      linestream >> value;
+      return value;
+    }
+  }
+
+  return string();
+}
 
 // TODO: Read and return the memory used by a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Ram(int pid [[maybe_unused]]) { return string(); }
+string LinuxParser::Ram(int pid) {
+  string key;
+  string line;
+  string value;
+  std::ifstream stream(kProcDirectory + std::to_string(pid) + kStatusFilename);
+  if (stream.is_open()) {
+    while (std::getline(stream, line)) {
+      std::istringstream linestream(line);
+      {
+        linestream >> key >> value;
+
+        if (key == "VmSize:") {
+          stream.close();
+          return value;
+        }
+      }
+    }
+  }
+
+  return string();
+}
 
 // DONE: Read and return the user ID associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
@@ -213,14 +247,13 @@ string LinuxParser::Uid(int pid) {
       {
         linestream >> key >> value;
 
-        if (key == "uid:") {
+        if (key == "Uid:") {
           stream.close();
           return value;
         }
       }
     }
   }
-  return 0;
 
   return string();
 }
@@ -230,22 +263,20 @@ string LinuxParser::Uid(int pid) {
 string LinuxParser::User(int pid) {
   std::string uid = Uid(pid);
 
-  std::cout << " HELLO "
-            << "\n";
-  std::cout << uid << "\n";
-
   string user;
   string line;
   string value1;
   string value2;
+
   std::ifstream stream(kPasswordPath);
   if (stream.is_open()) {
     while (std::getline(stream, line)) {
+      std::replace(line.begin(), line.end(), ':', ' ');
       std::istringstream linestream(line);
       {
         linestream >> user >> value1 >> value2;
 
-        if (value2 == uid) {
+        if (value2 == uid) {  // rememebr to change back from 1000 to uid...
           stream.close();
           return user;
         }
@@ -258,4 +289,63 @@ string LinuxParser::User(int pid) {
 
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::UpTime(int pid [[maybe_unused]]) { return 0; }
+long LinuxParser::UpTime(int pid) {
+  string key;
+  string line;
+  string value;
+  int pos = 22;
+  int cnt = 0;
+  std::ifstream stream(kProcDirectory + std::to_string(pid) + kStatFilename);
+  if (stream.is_open()) {
+    while (std::getline(stream, line)) {
+      std::istringstream linestream(line);
+      {
+        while (cnt++ < pos) {
+          linestream >> key;
+        }
+
+        stream.close();
+
+        return std::stol(key) /
+               sysconf(_SC_CLK_TCK);  // to convert to seconds from ticks
+      }
+    }
+  }
+
+  return 0;
+}
+
+float LinuxParser::ProcCpu(int pid) {
+  std::vector<std::string> item;
+  std::string line;
+  std::string key;
+  std::ifstream stream(kProcDirectory + std::to_string(pid) + kStatFilename);
+  if (stream.is_open()) {
+    while (std::getline(stream, line)) {
+      std::istringstream linestream(line);
+      {
+        for (int i = 0; i < 22; i++) {
+          linestream >> key;
+          item.push_back(key);
+        }
+        // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
+        long up_time = UpTime();
+        long utime = std::stol(item[13]) / sysconf(_SC_CLK_TCK);
+        long stime = std::stol(item[14]) / sysconf(_SC_CLK_TCK);
+        long cutime = std::stol(item[15]) / sysconf(_SC_CLK_TCK);
+        long cstime = std::stol(item[16]) / sysconf(_SC_CLK_TCK);
+        long start_time = std::stol(item[21]) / sysconf(_SC_CLK_TCK);
+        ;
+        stream.close();
+
+        long total_time = utime + stime;
+        total_time += cutime + cstime;  // incldue children processes
+        long seconds = up_time - start_time;
+
+        return ((float)total_time / seconds);
+      }
+    }
+  }
+
+  return 0.0;
+}

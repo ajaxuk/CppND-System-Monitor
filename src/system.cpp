@@ -7,6 +7,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "linux_parser.h"
 #include "process.h"
@@ -32,23 +33,34 @@ vector<Process>& System::Processes() {
 
   std::vector<int> pids = LinuxParser::Pids();
   int process_number = pids.size();
+  processes_.clear();
 
-  Process* new_processes =
-      new Process[process_number];  // dynamic array of objects through use of
+  //Process* new_processes =
+    //  new Process[process_number];  // dynamic array of objects through use of
                                     // pointers.
 
   // populate the memebr variables of each process
   for (int i = 0; i < process_number; i++) {
-    new_processes[i].Pid(pids[i]);
-    new_processes[i].User("Mark");
-    new_processes[i].CpuUtilization(1.1);
-    new_processes[i].Ram("Why");
-    processes_.push_back(new_processes[i]);
+    Process p;
+   p.Pid(pids[i]);
+    p.User(LinuxParser::User(pids[i]));
+    p.CpuUtilization(LinuxParser::ProcCpu(pids[i]));
+    p.Ram(LinuxParser::Ram(
+        pids[i]));  //  TODO::change to int , why is it string and make it mb
+    p.UpTime(LinuxParser::UpTime(pids[i]));
+    p.Command(LinuxParser::Command(pids[i]));
+
+    processes_.push_back(p);
   }
 
-  delete[] new_processes;
+std::sort(processes_.begin(),processes_.end(),[](Process &a, Process &b){ return b < a; });
+
+  // clean up / / release memory allocated on the heap
+  //delete[] new_processes;
   return processes_;
 }
+
+
 
 // DONE: Return the system's kernel identifier (string)
 std::string System::Kernel() { return LinuxParser::Kernel(); }
