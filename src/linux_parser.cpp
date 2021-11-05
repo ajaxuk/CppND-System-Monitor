@@ -7,11 +7,40 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <filesystem>
+
 
 using std::stof;
 using std::string;
 using std::to_string;
 using std::vector;
+
+namespace fs = std::filesystem;
+
+// Generic Linux Parser that accepts a vector of ints (sequential order small to
+// large) to represent the loctions for a line to be retrieved and returns a
+// string vector of the values retrieved.
+void LinuxParser::GenericLineParse(std::string const filepath,
+                                   std::vector<int> const& pos,
+                                   std::vector<string>& val) {
+  string line;
+  int cnt = 1;  // used to keep track of position in linestream
+  string not_required;
+  string required;
+  std::ifstream stream(filepath);
+  if (stream.is_open()) {
+    while (std::getline(stream, line)) {
+      std::istringstream linestream(line);
+      {
+        for (auto p : pos) {
+          while (cnt++ < p) linestream >> not_required;
+          linestream >> required;
+          val.emplace_back(required);
+        }
+      }
+    }
+  }
+}
 
 // DONE: An example of how to read data from the filesystem
 string LinuxParser::OperatingSystem() {
@@ -38,19 +67,25 @@ string LinuxParser::OperatingSystem() {
 
 // DONE: An example of how to read data from the filesystem
 string LinuxParser::Kernel() {
-  string os, kernel, version;
-  string line;
-  std::ifstream stream(kProcDirectory + kVersionFilename);
-  if (stream.is_open()) {
-    std::getline(stream, line);
-    std::istringstream linestream(line);
-    linestream >> os >> version >> kernel;
-  }
-  return kernel;
+  string filelocation{kProcDirectory + kVersionFilename};
+  vector<string> kernel{};
+  vector<int> positions = {3};  // third item is kernel
+
+  GenericLineParse(filelocation, positions, kernel);
+
+  return kernel.back();
 }
 
 // BONUS: Update this to use std::filesystem
 vector<int> LinuxParser::Pids() {
+
+fs::path dir(kProcDirectory);
+for (const auto& file : dir )
+{
+}
+
+
+
   vector<int> pids;
   DIR* directory = opendir(kProcDirectory.c_str());
   struct dirent* file;
@@ -103,15 +138,13 @@ float LinuxParser::MemoryUtilization() {
 // DONE (TESTED vs htop): Read and return the system uptime
 // There are two entries in uptime. We only need the first.
 long LinuxParser::UpTime() {
-  string uptime;
-  string line;
-  std::ifstream stream(kProcDirectory + kUptimeFilename);
-  if (stream.is_open()) {
-    std::getline(stream, line);
-    std::istringstream linestream(line);
-    linestream >> uptime;
-  }
-  return std::stol(uptime);  // convert string to long
+  string filelocation{kProcDirectory + kUptimeFilename};
+  vector<string> uptime{};
+  vector<int> positions = {1};  // first item in file
+
+  GenericLineParse(filelocation, positions, uptime);
+
+  return std::stol(uptime.back());
 }
 
 // TODO: Read and return the number of jiffies for the system
@@ -129,7 +162,25 @@ long LinuxParser::IdleJiffies() { return 0; }
 
 // TODO: Read and return CPU utilization
 vector<string> LinuxParser::CpuUtilization() {
+
+
+  /*
+  string filelocation{kProcDirectory + kStatFilename};
   vector<string> cpu_util{};
+  vector<int> positions = {};  // first item in file
+  for (int i = kUser_; i <= kGuestNice_; i++)
+    positions.emplace_back(
+        i +
+        1);  // add 1 since Kuser is not in position 1 but is enumerated to 0
+
+  GenericLineParse(filelocation, positions, cpu_util);
+
+  return cpu_util;
+
+  */
+
+  vector<string> cpu_util{};
+
   string item;
   string line;
   std::ifstream stream(kProcDirectory + kStatFilename);
@@ -145,10 +196,14 @@ vector<string> LinuxParser::CpuUtilization() {
   }
 
   return cpu_util;
+
+  
 }
 
 // DONE: Read and return the total number of processes
 int LinuxParser::TotalProcesses() {
+
+
   string key;
   string line;
   string value;

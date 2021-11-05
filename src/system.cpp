@@ -25,10 +25,10 @@ You need to properly format the uptime. Refer to the comments mentioned in
 format. cpp for formatting the uptime.*/
 
 // TODO: Return the system's CPU
-Processor& System::Cpu() { 
-  
-  // Why do I need a CPU object ?  
-  return cpu_; }
+Processor& System::Cpu() {
+  // Why do I need a CPU object ?
+  return cpu_;
+}
 
 // DONE: Return a container composed of the system's processes
 vector<Process>& System::Processes() {

@@ -26,6 +26,8 @@ int TotalProcesses();
 int RunningProcesses();
 std::string OperatingSystem();
 std::string Kernel();
+void GenericLineParse(std::string const filepath, std::vector<int> const &pos,
+                      std::vector<std::string> &val);
 
 // CPU
 enum CPUStates {
