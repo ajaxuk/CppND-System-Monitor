@@ -22,7 +22,7 @@ class System {
  private:
   Processor cpu_ = {};  // compoisiton:System "has a" cpu
   std::vector<Process> processes_ =
-      {};  // cpmposiiton: Should cpu_have processe rather than System...?
+      {};  // composiiton: Should cpu_have process rather than System...?
 };
 
 #endif

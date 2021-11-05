@@ -5,6 +5,9 @@
 /*
 Basic class for Process representation
 It contains relevant attributes as shown below
+
+I dont beleive the getters / setters are really necessary here..
+
 */
 class Process {
  public:

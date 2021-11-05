@@ -3,19 +3,18 @@
 #include <dirent.h>
 #include <unistd.h>
 
+#include <filesystem>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <filesystem>
-
 
 using std::stof;
 using std::string;
 using std::to_string;
 using std::vector;
 
-namespace fs = std::filesystem;
+using std::filesystem::directory_iterator;
 
 // Generic Linux Parser that accepts a vector of ints (sequential order small to
 // large) to represent the loctions for a line to be retrieved and returns a
@@ -76,31 +75,34 @@ string LinuxParser::Kernel() {
   return kernel.back();
 }
 
-// BONUS: Update this to use std::filesystem
+// DONE: Update this to use std::filesystem
 vector<int> LinuxParser::Pids() {
-
-fs::path dir(kProcDirectory);
-for (const auto& file : dir )
-{
-}
-
-
-
   vector<int> pids;
-  DIR* directory = opendir(kProcDirectory.c_str());
-  struct dirent* file;
-  while ((file = readdir(directory)) != nullptr) {
-    // Is this a directory?
-    if (file->d_type == DT_DIR) {
-      // Is every character of the name a digit?
-      string filename(file->d_name);
-      if (std::all_of(filename.begin(), filename.end(), isdigit)) {
-        int pid = stoi(filename);
-        pids.push_back(pid);
-      }
+  string dir_name;
+
+  for (const auto& dir : directory_iterator(kProcDirectory)) {
+    dir_name = dir.path().filename().string();
+    if (std::all_of(dir_name.begin(), dir_name.end(), isdigit)) {
+      pids.emplace_back(std::stoi(dir_name));
     }
   }
-  closedir(directory);
+  /*
+    // OLD CODE
+    DIR* directory = opendir(kProcDirectory.c_str());
+    struct dirent* file;
+    while ((file = readdir(directory)) != nullptr) {
+      // Is this a directory?
+      if (file->d_type == DT_DIR) {
+        // Is every character of the name a digit?
+        string filename(file->d_name);
+        if (std::all_of(filename.begin(), filename.end(), isdigit)) {
+          int pid = stoi(filename);
+          pids.push_back(pid);
+        }
+      }
+    }
+    closedir(directory);
+    */
   return pids;
 }
 
@@ -162,8 +164,6 @@ long LinuxParser::IdleJiffies() { return 0; }
 
 // TODO: Read and return CPU utilization
 vector<string> LinuxParser::CpuUtilization() {
-
-
   /*
   string filelocation{kProcDirectory + kStatFilename};
   vector<string> cpu_util{};
@@ -196,14 +196,10 @@ vector<string> LinuxParser::CpuUtilization() {
   }
 
   return cpu_util;
-
-  
 }
 
 // DONE: Read and return the total number of processes
 int LinuxParser::TotalProcesses() {
-
-
   string key;
   string line;
   string value;
