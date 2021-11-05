@@ -23,21 +23,23 @@ void LinuxParser::GenericLineParse(std::string const filepath,
                                    std::vector<int> const& pos,
                                    std::vector<string>& val) {
   string line;
-  int cnt = 1;  // used to keep track of position in linestream
+  int cnt = 0;  // used to keep track of position in linestream
   string not_required;
   string required;
   std::ifstream stream(filepath);
   if (stream.is_open()) {
-    while (std::getline(stream, line)) {
+  (std::getline(stream, line));
       std::istringstream linestream(line);
       {
         for (auto p : pos) {
-          while (cnt++ < p) linestream >> not_required;
+          while (cnt < p) {
+          linestream >> not_required;
+          cnt++;}
           linestream >> required;
+          cnt++;
           val.emplace_back(required);
         }
       }
-    }
   }
 }
 
@@ -68,7 +70,7 @@ string LinuxParser::OperatingSystem() {
 string LinuxParser::Kernel() {
   string filelocation{kProcDirectory + kVersionFilename};
   vector<string> kernel{};
-  vector<int> positions = {3};  // third item is kernel
+  vector<int> positions = {2};  // (third item is kernel 0,1,2,3 vector numbering)
 
   GenericLineParse(filelocation, positions, kernel);
 
@@ -142,45 +144,70 @@ float LinuxParser::MemoryUtilization() {
 long LinuxParser::UpTime() {
   string filelocation{kProcDirectory + kUptimeFilename};
   vector<string> uptime{};
-  vector<int> positions = {1};  // first item in file
+  vector<int> positions = {0};  // first item in file
 
   GenericLineParse(filelocation, positions, uptime);
 
   return std::stol(uptime.back());
 }
 
-// TODO: Read and return the number of jiffies for the system
-long LinuxParser::Jiffies() { return 0; }
+// DONE: Read and return the number of jiffies for the system
+long LinuxParser::Jiffies() { 
+  return IdleJiffies()+ActiveJiffies(); }
 
 // TODO: Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
 
 // TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { return 0; }
+long LinuxParser::ActiveJiffies() { 
+  
+  long total_active_jiffies{};
+
+  vector<int> active_jiffies{kUser_, kNice_, kSystem_,
+                                kIRQ_,  kSoftIRQ_, kSteal_};
+
+
+
+  std::for_each(active_jiffies.begin(), active_jiffies.end(), [](int &n){ n+=1; }); // +1 becasue stat file starts with cpu column
+
+  string filelocation{kProcDirectory + kStatFilename};
+  vector<string> active_Jiffy_values{};
+  
+  GenericLineParse(filelocation,active_jiffies,active_Jiffy_values);
+
+  for (auto & ajv : active_Jiffy_values)
+    total_active_jiffies += std::stol(ajv);
+  
+  return total_active_jiffies; }
 
 // TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { return 0; }
+long LinuxParser::IdleJiffies() { 
+  
+  
+  long total_idle_jiffies{};
 
-// TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() {
-  /*
+  vector<int> idle_jiffies{kIdle_, kIOwait_};
+
+
+
+  std::for_each(idle_jiffies.begin(), idle_jiffies.end(), [](int &n){ n+=1; }); // +1 becasue stat file starts with cpu column
+
   string filelocation{kProcDirectory + kStatFilename};
+  vector<string> idle_Jiffy_values{};
+  
+  GenericLineParse(filelocation,idle_jiffies,idle_Jiffy_values);
+
+  for (auto & ajv : idle_Jiffy_values)
+    total_idle_jiffies += std::stol(ajv);
+  
+  return total_idle_jiffies; }
+  
+// DONE Read and return CPU utilization (Does it but not needed)
+vector<string> LinuxParser::CpuUtilization() {
+
+  // not used since utilisation usies the active jiffies and idle jiffies parser functions
   vector<string> cpu_util{};
-  vector<int> positions = {};  // first item in file
-  for (int i = kUser_; i <= kGuestNice_; i++)
-    positions.emplace_back(
-        i +
-        1);  // add 1 since Kuser is not in position 1 but is enumerated to 0
-
-  GenericLineParse(filelocation, positions, cpu_util);
-
-  return cpu_util;
-
-  */
-
-  vector<string> cpu_util{};
-
   string item;
   string line;
   std::ifstream stream(kProcDirectory + kStatFilename);
