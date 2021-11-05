@@ -38,10 +38,6 @@ vector<Process>& System::Processes() {
   int process_number = pids.size();
   processes_.clear();  // empty the container to reload the processes.
 
-  // Process* new_processes =
-  //  new Process[process_number];  // dynamic array of objects through use of
-  // pointers.
-
   // populate the memebr variables of each process
   for (int i = 0; i < process_number; i++) {
     Process p;
@@ -59,8 +55,6 @@ vector<Process>& System::Processes() {
   std::sort(processes_.begin(), processes_.end(),
             [](Process& a, Process& b) { return b < a; });
 
-  // clean up / / release memory allocated on the heap
-  // delete[] new_processes;
   return processes_;
 }
 

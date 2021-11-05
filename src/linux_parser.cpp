@@ -153,11 +153,29 @@ long LinuxParser::UpTime() {
 
 // DONE: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() { 
-  return IdleJiffies()+ActiveJiffies(); }
+  return IdleJiffies()+ActiveJiffies(); }  // not used
 
 // TODO: Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
+long LinuxParser::ActiveJiffies(int pid) { 
+  
+
+  long total_active_jiffies{};
+
+  // 14=utime, 15=stime, 16=cutime, 17=cstime
+  // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
+  vector<int> active_jiffies{14, 15, 16, 17,  18};
+
+  string filelocation{kProcDirectory + std::to_string(pid) + kStatFilename};
+  vector<string> active_Jiffy_values{};
+  
+  GenericLineParse(filelocation,active_jiffies,active_Jiffy_values);
+
+  for (auto & ajv : active_Jiffy_values)
+    total_active_jiffies += std::stol(ajv);
+  
+  return total_active_jiffies; }
+
 
 // TODO: Read and return the number of active jiffies for the system
 long LinuxParser::ActiveJiffies() { 

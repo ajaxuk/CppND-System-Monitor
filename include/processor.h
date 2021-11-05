@@ -14,6 +14,8 @@ class Processor {
 
  private:
 
+
+
   long prev_active_jiffies_{};
   long prev_idle_jiffies_{};
 };
