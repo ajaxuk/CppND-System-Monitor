@@ -7,7 +7,7 @@ using std::string;
 #define SECS_IN_HOUR 3600
 #define SECS_IN_MINUTE 60
 
-// DONE (Not Tested): Complete this helper function
+// DONE: Complete this helper function
 // INPUT: Long int measuring seconds
 // OUTPUT: HH:MM:SS
 // REMOVE: [[maybe_unused]] once you define the function

@@ -11,14 +11,14 @@ I dont beleive the getters / setters are really necessary here..
 */
 class Process {
  public:
-  int Pid() const;               // TODO: See src/process.cpp
-  std::string User() const;      // TODO: See src/process.cpp
-  std::string Command() const;   // TODO: See src/process.cpp
-  float CpuUtilization() const;  // TODO: See src/process.cpp
-  std::string Ram() const;       // TODO: See src/process.cpp
-  long int UpTime() const;       // TODO: See src/process.cpp
+  int Pid() const;               // DONE: See src/process.cpp
+  std::string User() const;      // DONE: See src/process.cpp
+  std::string Command() const;   // DONE: See src/process.cpp
+  float CpuUtilization() const;  // DONE: See src/process.cpp
+  std::string Ram() const;       // DONE: See src/process.cpp
+  long int UpTime() const;       // DONE: See src/process.cpp
 
-  bool operator<(Process const& a) const;  // TODO: See src/process.cpp
+  bool operator<(Process const& a) const;  // DONE: See src/process.cpp
 
   void Pid(int pid);
   void User(std::string user);
@@ -27,9 +27,8 @@ class Process {
   void Command(std::string command);
   void UpTime(long int uptime);
 
-  // TODO: Declare any necessary private members
+  // DONE: Declare any necessary private members
  private:
-  friend class System;
   int pid_{};
   std::string user_;
   float cpuutilization_{};

@@ -28,18 +28,19 @@ void LinuxParser::GenericLineParse(std::string const filepath,
   string required;
   std::ifstream stream(filepath);
   if (stream.is_open()) {
-  (std::getline(stream, line));
-      std::istringstream linestream(line);
-      {
-        for (auto p : pos) {
-          while (cnt < p) {
+    (std::getline(stream, line));
+    std::istringstream linestream(line);
+    {
+      for (auto p : pos) {
+        while (cnt < p) {
           linestream >> not_required;
-          cnt++;}
-          linestream >> required;
           cnt++;
-          val.emplace_back(required);
         }
+        linestream >> required;
+        cnt++;
+        val.emplace_back(required);
       }
+    }
   }
 }
 
@@ -70,7 +71,8 @@ string LinuxParser::OperatingSystem() {
 string LinuxParser::Kernel() {
   string filelocation{kProcDirectory + kVersionFilename};
   vector<string> kernel{};
-  vector<int> positions = {2};  // (third item is kernel 0,1,2,3 vector numbering)
+  vector<int> positions = {
+      2};  // (third item is kernel 0,1,2,3 vector numbering)
 
   GenericLineParse(filelocation, positions, kernel);
 
@@ -152,79 +154,74 @@ long LinuxParser::UpTime() {
 }
 
 // DONE: Read and return the number of jiffies for the system
-long LinuxParser::Jiffies() { 
-  return IdleJiffies()+ActiveJiffies(); }  // not used
+long LinuxParser::Jiffies() {
+  return IdleJiffies() + ActiveJiffies();
+}  // not used
 
-// TODO: Read and return the number of active jiffies for a PID
+// DONE: Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::ActiveJiffies(int pid) { 
-  
-
+long LinuxParser::ActiveJiffies(int pid) {
   long total_active_jiffies{};
 
   // 14=utime, 15=stime, 16=cutime, 17=cstime
   // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
-  vector<int> active_jiffies{14, 15, 16, 17,  18};
+  vector<int> active_jiffies{14, 15, 16, 17, 18};
 
   string filelocation{kProcDirectory + std::to_string(pid) + kStatFilename};
   vector<string> active_Jiffy_values{};
-  
-  GenericLineParse(filelocation,active_jiffies,active_Jiffy_values);
 
-  for (auto & ajv : active_Jiffy_values)
-    total_active_jiffies += std::stol(ajv);
-  
-  return total_active_jiffies; }
+  GenericLineParse(filelocation, active_jiffies, active_Jiffy_values);
 
+  for (auto& ajv : active_Jiffy_values) total_active_jiffies += std::stol(ajv);
 
-// TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { 
-  
+  return total_active_jiffies;
+}
+
+// DONE: Read and return the number of active jiffies for the system
+long LinuxParser::ActiveJiffies() {
   long total_active_jiffies{};
 
-  vector<int> active_jiffies{kUser_, kNice_, kSystem_,
-                                kIRQ_,  kSoftIRQ_, kSteal_};
+  vector<int> active_jiffies{kUser_, kNice_,    kSystem_,
+                             kIRQ_,  kSoftIRQ_, kSteal_};
 
-
-
-  std::for_each(active_jiffies.begin(), active_jiffies.end(), [](int &n){ n+=1; }); // +1 becasue stat file starts with cpu column
+  std::for_each(active_jiffies.begin(), active_jiffies.end(), [](int& n) {
+    n += 1;
+  });  // +1 becasue stat file starts with cpu column
 
   string filelocation{kProcDirectory + kStatFilename};
   vector<string> active_Jiffy_values{};
-  
-  GenericLineParse(filelocation,active_jiffies,active_Jiffy_values);
 
-  for (auto & ajv : active_Jiffy_values)
-    total_active_jiffies += std::stol(ajv);
-  
-  return total_active_jiffies; }
+  GenericLineParse(filelocation, active_jiffies, active_Jiffy_values);
 
-// TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { 
-  
-  
+  for (auto& ajv : active_Jiffy_values) total_active_jiffies += std::stol(ajv);
+
+  return total_active_jiffies;
+}
+
+// DONE: Read and return the number of idle jiffies for the system
+long LinuxParser::IdleJiffies() {
   long total_idle_jiffies{};
 
   vector<int> idle_jiffies{kIdle_, kIOwait_};
 
-
-
-  std::for_each(idle_jiffies.begin(), idle_jiffies.end(), [](int &n){ n+=1; }); // +1 becasue stat file starts with cpu column
+  std::for_each(idle_jiffies.begin(), idle_jiffies.end(), [](int& n) {
+    n += 1;
+  });  // +1 becasue stat file starts with cpu column
 
   string filelocation{kProcDirectory + kStatFilename};
   vector<string> idle_Jiffy_values{};
-  
-  GenericLineParse(filelocation,idle_jiffies,idle_Jiffy_values);
 
-  for (auto & ajv : idle_Jiffy_values)
-    total_idle_jiffies += std::stol(ajv);
-  
-  return total_idle_jiffies; }
-  
+  GenericLineParse(filelocation, idle_jiffies, idle_Jiffy_values);
+
+  for (auto& ajv : idle_Jiffy_values) total_idle_jiffies += std::stol(ajv);
+
+  return total_idle_jiffies;
+}
+
 // DONE Read and return CPU utilization (Does it but not needed)
 vector<string> LinuxParser::CpuUtilization() {
-
-  // not used since utilisation usies the active jiffies and idle jiffies parser functions
+  // not used since utilisation usies the active jiffies and idle jiffies parser
+  // functions
   vector<string> cpu_util{};
   string item;
   string line;
@@ -387,63 +384,36 @@ string LinuxParser::User(int pid) {
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::UpTime(int pid) {
-  string key;
-  string line;
-  string value;
-  int pos = 22;
-  int cnt = 0;
-  std::ifstream stream(kProcDirectory + std::to_string(pid) + kStatFilename);
-  if (stream.is_open()) {
-    while (std::getline(stream, line)) {
-      std::istringstream linestream(line);
-      {
-        while (cnt++ < pos) {
-          linestream >> key;
-        }
+  long proc_up_time{};
 
-        stream.close();
+  // 22=start time
+  // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
+  vector<int> active_jiffies{21};  // using vector numbering...21 == 22
 
-        return std::stol(key) /
-               sysconf(_SC_CLK_TCK);  // to convert to seconds from ticks
-      }
-    }
-  }
+  string filelocation{kProcDirectory + std::to_string(pid) + kStatFilename};
+  vector<string> active_Jiffy_values{};
 
-  return 0;
+  GenericLineParse(filelocation, active_jiffies, active_Jiffy_values);
+
+  for (auto& ajv : active_Jiffy_values) proc_up_time += std::stol(ajv);
+
+  return proc_up_time /
+         sysconf(_SC_CLK_TCK);  // to convert to seconds from ticks;
 }
 
+// Added this function to wrap up Process Cpu utilisation
 float LinuxParser::ProcCpu(int pid) {
-  std::vector<std::string> item;
-  std::string line;
-  std::string key;
-  std::ifstream stream(kProcDirectory + std::to_string(pid) + kStatFilename);
-  if (stream.is_open()) {
-    while (std::getline(stream, line)) {
-      std::istringstream linestream(line);
-      {
-        for (int i = 0; i < 22; i++) {
-          linestream >> key;
-          item.push_back(key);
-        }
-        // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
-        long up_time = UpTime();
-        long utime = std::stol(item[13]) / sysconf(_SC_CLK_TCK);
-        long stime = std::stol(item[14]) / sysconf(_SC_CLK_TCK);
-        long cutime = std::stol(item[15]) / sysconf(_SC_CLK_TCK);
-        long cstime = std::stol(item[16]) / sysconf(_SC_CLK_TCK);
-        long start_time = std::stol(item[21]) / sysconf(_SC_CLK_TCK);
+  // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
 
-        stream.close();
+  long proc_jiffes = ActiveJiffies(pid);
+  long up_time = UpTime();
+  long start_time = UpTime(pid);
 
-        long total_time = utime + stime;
-        total_time += cutime + cstime;  // incldue children processes
-        long seconds = up_time - start_time;
+  long seconds =
+      up_time -
+      (start_time / sysconf(_SC_CLK_TCK));  // to convert to seconds from ticks;
+  float total_time = (float)proc_jiffes / sysconf(_SC_CLK_TCK);
 
-        return ((float)total_time /
-                seconds);  // already multiplied by 100 in ncurses_display.cpp
-      }
-    }
-  }
-
-  return 0.0;
+  return total_time /
+         seconds;  // already multiplied by 100 in ncurses_display.cpp
 }

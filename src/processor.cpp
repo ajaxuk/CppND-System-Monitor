@@ -1,6 +1,5 @@
 #include "processor.h"
 
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -17,8 +16,8 @@ float Processor::Utilization() {
   long active_jiffies = LinuxParser::ActiveJiffies();
   long idle_jiffies = LinuxParser::IdleJiffies();
 
-  total_delta =
-      (active_jiffies + idle_jiffies) - (prev_active_jiffies_ + prev_idle_jiffies_);
+  total_delta = (active_jiffies + idle_jiffies) -
+                (prev_active_jiffies_ + prev_idle_jiffies_);
   idle_delta = idle_jiffies - prev_idle_jiffies_;
 
   // store current as previous for next round of calculations
