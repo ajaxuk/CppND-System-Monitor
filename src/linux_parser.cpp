@@ -381,7 +381,7 @@ string LinuxParser::User(int pid) {
   return string();
 }
 
-// TODO: Read and return the uptime of a process
+// TODO: Read and return the uptime of a process in seconds
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::UpTime(int pid) {
   long proc_up_time{};
@@ -397,8 +397,7 @@ long LinuxParser::UpTime(int pid) {
 
   for (auto& ajv : active_Jiffy_values) proc_up_time += std::stol(ajv);
 
-  return proc_up_time /
-         sysconf(_SC_CLK_TCK);  // to convert to seconds from ticks;
+  return UpTime() - (proc_up_time / sysconf(_SC_CLK_TCK));  // to convert to seconds from ticks;
 }
 
 // Added this function to wrap up Process Cpu utilisation
