@@ -432,7 +432,7 @@ float LinuxParser::ProcCpu(int pid) {
         long cutime = std::stol(item[15]) / sysconf(_SC_CLK_TCK);
         long cstime = std::stol(item[16]) / sysconf(_SC_CLK_TCK);
         long start_time = std::stol(item[21]) / sysconf(_SC_CLK_TCK);
-        ;
+
         stream.close();
 
         long total_time = utime + stime;

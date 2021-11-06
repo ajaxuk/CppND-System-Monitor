@@ -29,6 +29,7 @@ class Process {
 
   // TODO: Declare any necessary private members
  private:
+  friend class System;
   int pid_{};
   std::string user_;
   float cpuutilization_{};

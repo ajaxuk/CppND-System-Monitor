@@ -24,6 +24,7 @@ void Process::UpTime(long int uptime) { uptime_ = uptime; };
 void Process::Pid(int pid) { pid_ = pid; }
 void Process::User(std::string user) { user_ = user; }
 void Process::CpuUtilization(float cpuutilization) {
+
   cpuutilization_ = cpuutilization;
 }
 void Process::Ram(std::string ram) { ram_ = ram; }

@@ -43,7 +43,13 @@ vector<Process>& System::Processes() {
     Process p;
     p.Pid(pids[i]);
     p.User(LinuxParser::User(pids[i]));
-    p.CpuUtilization(LinuxParser::ProcCpu(pids[i]));
+
+
+    p.CpuUtilization(LinuxParser::ActiveJiffies(pids[i]));
+ 
+
+
+
     p.Ram(LinuxParser::Ram(pids[i]));
     p.UpTime(LinuxParser::UpTime(pids[i]));
     p.Command(LinuxParser::Command(pids[i]));
